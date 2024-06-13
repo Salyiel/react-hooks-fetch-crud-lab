@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function QuestionForm(props) {
+function QuestionForm({ onQuestionAdded }) {
   const [formData, setFormData] = useState({
     prompt: "",
     answer1: "",
@@ -11,15 +11,44 @@ function QuestionForm(props) {
   });
 
   function handleChange(event) {
+    const { name, value } = event.target;
     setFormData({
       ...formData,
-      [event.target.name]: event.target.value,
+      [name]: value,
     });
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(formData);
+
+    const newQuestion = {
+      prompt: formData.prompt,
+      answers: [formData.answer1, formData.answer2, formData.answer3, formData.answer4],
+      correctIndex: parseInt(formData.correctIndex),
+    };
+
+    fetch("http://localhost:4000/questions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newQuestion),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        onQuestionAdded(data);
+        // Reset form data after successful submission
+        setFormData({
+          prompt: "",
+          answer1: "",
+          answer2: "",
+          answer3: "",
+          answer4: "",
+          correctIndex: 0,
+        });
+        alert("Question Added");
+      })
+      .catch((error) => console.error("Error adding question:", error));
   }
 
   return (
@@ -33,6 +62,7 @@ function QuestionForm(props) {
             name="prompt"
             value={formData.prompt}
             onChange={handleChange}
+            required
           />
         </label>
         <label>
@@ -42,6 +72,7 @@ function QuestionForm(props) {
             name="answer1"
             value={formData.answer1}
             onChange={handleChange}
+            required
           />
         </label>
         <label>
@@ -51,6 +82,7 @@ function QuestionForm(props) {
             name="answer2"
             value={formData.answer2}
             onChange={handleChange}
+            required
           />
         </label>
         <label>
@@ -60,6 +92,7 @@ function QuestionForm(props) {
             name="answer3"
             value={formData.answer3}
             onChange={handleChange}
+            required
           />
         </label>
         <label>
@@ -69,6 +102,7 @@ function QuestionForm(props) {
             name="answer4"
             value={formData.answer4}
             onChange={handleChange}
+            required
           />
         </label>
         <label>
